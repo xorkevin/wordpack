@@ -3,7 +3,6 @@ package linebreak
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"os"
 	"strings"
 )
