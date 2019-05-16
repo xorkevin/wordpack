@@ -2,6 +2,7 @@ package linebreak
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"strings"
 )
@@ -98,6 +99,24 @@ func wrapParagraph(paragraph string, width int, w *bufio.Writer) error {
 		return err
 	}
 	return nil
+}
+
+func splitParagraphs(data []byte, atEOF bool) (int, []byte, error) {
+	if atEOF && len(data) == 0 {
+		return 0, nil, nil
+	}
+
+	if i := bytes.Index(data, []byte("\n\n")); i >= 0 {
+		if i == 0 {
+			return 2, nil, nil
+		}
+		return i + 2, data[0:i], nil
+	}
+
+	if atEOF {
+		return len(data), data, nil
+	}
+	return 0, nil, nil
 }
 
 // WrapParagraphs wraps stdin or an input file on a per paragraph basis. A

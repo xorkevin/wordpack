@@ -36,3 +36,20 @@ func Test_wrapParagraph(t *testing.T) {
 	s := b.String()
 	assert.Equal("AAA\nBB CC\nDDDDD\n", s, "string should not be greedily wrapped")
 }
+
+func Test_splitParagraphs(t *testing.T) {
+	assert := assert.New(t)
+
+	b := bytes.Buffer{}
+	b.WriteString("A B\nC\nD E\n\nF G\n\n\n\nH I\nJ\n\nK\n")
+	scanner := bufio.NewScanner(&b)
+	scanner.Split(splitParagraphs)
+	k := make([]string, 0, 4)
+	for scanner.Scan() {
+		k = append(k, scanner.Text())
+	}
+	assert.Equal("A B\nC\nD E", k[0], "newline should not create a new paragraph")
+	assert.Equal("F G", k[1], "paragraphs can be a single line")
+	assert.Equal("H I\nJ", k[2], "more than 2 newlines do not create a new paragraph")
+	assert.Equal("K\n", k[3], "end of file is not discarded")
+}
