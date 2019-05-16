@@ -14,6 +14,7 @@ var cfgFile string
 
 var (
 	paragraphWidth int
+	showWrapCost   bool
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -26,7 +27,7 @@ selectable line break algorithm`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := linebreak.WrapParagraphs(paragraphWidth); err != nil {
+		if err := linebreak.WrapParagraphs(paragraphWidth, showWrapCost); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
@@ -54,6 +55,7 @@ func init() {
 	// when this action is called directly.
 	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	rootCmd.Flags().IntVarP(&paragraphWidth, "width", "w", 80, "width at which to wrap paragraphs")
+	rootCmd.Flags().BoolVarP(&showWrapCost, "cost", "c", false, "output to stdout the cost of the linebreaks")
 }
 
 // initConfig reads in config file and ENV variables if set.

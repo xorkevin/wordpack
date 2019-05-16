@@ -3,6 +3,7 @@ package linebreak
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"os"
 	"strings"
 )
@@ -79,26 +80,29 @@ func findBreakpointsKnuth(wordLengths []int, width int) (int, []int) {
 	return finalcost, breakstack
 }
 
-func wrapParagraph(paragraph string, width int, w *bufio.Writer) error {
+func wrapParagraph(paragraph string, width int, w *bufio.Writer, showWrapCost bool) (int, error) {
 	words, wordLengths := splitWords(paragraph)
-	_, breakstack := findBreakpointsKnuth(wordLengths, width)
+	cost, breakstack := findBreakpointsKnuth(wordLengths, width)
+	if showWrapCost {
+		return cost, nil
+	}
 	prev := 0
 	for _, i := range breakstack {
 		if _, err := w.WriteString(strings.Join(words[prev:i], " ")); err != nil {
-			return err
+			return 0, err
 		}
 		if _, err := w.WriteString("\n"); err != nil {
-			return err
+			return 0, err
 		}
 		prev = i
 	}
 	if _, err := w.WriteString(strings.Join(words[prev:], " ")); err != nil {
-		return err
+		return 0, err
 	}
 	if _, err := w.WriteString("\n"); err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+	return cost, nil
 }
 
 func splitParagraphs(data []byte, atEOF bool) (int, []byte, error) {
@@ -121,30 +125,40 @@ func splitParagraphs(data []byte, atEOF bool) (int, []byte, error) {
 
 // WrapParagraphs wraps stdin or an input file on a per paragraph basis. A
 // paragraph is separated by two new lines.
-func WrapParagraphs(width int) error {
+func WrapParagraphs(width int, showWrapCost bool) error {
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Split(splitParagraphs)
 	w := bufio.NewWriter(os.Stdout)
 
 	first := true
 
+	totalCost := 0
+
 	for scanner.Scan() {
-		if first {
-			first = false
-		} else {
-			if _, err := w.WriteString("\n"); err != nil {
-				return err
+		if !showWrapCost {
+			if first {
+				first = false
+			} else {
+				if _, err := w.WriteString("\n"); err != nil {
+					return err
+				}
 			}
 		}
-		if err := wrapParagraph(scanner.Text(), width, w); err != nil {
+		cost, err := wrapParagraph(scanner.Text(), width, w, showWrapCost)
+		if err != nil {
 			return err
 		}
+		totalCost += cost
 	}
 	if err := scanner.Err(); err != nil {
 		return err
 	}
-	if err := w.Flush(); err != nil {
-		return err
+	if showWrapCost {
+		fmt.Println(totalCost)
+	} else {
+		if err := w.Flush(); err != nil {
+			return err
+		}
 	}
 	return nil
 }
