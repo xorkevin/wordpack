@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -121,11 +122,30 @@ func splitParagraphs(data []byte, atEOF bool) (int, []byte, error) {
 
 // WrapParagraphs wraps stdin or an input file on a per paragraph basis. A
 // paragraph is separated by two new lines.
-func WrapParagraphs(width int, args []string) {
-	if len(args) > 0 {
-		fmt.Println(args[0])
-	} else {
-		fmt.Println("stdin")
+func WrapParagraphs(width int) error {
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Split(splitParagraphs)
+	w := bufio.NewWriter(os.Stdout)
+
+	first := true
+
+	for scanner.Scan() {
+		if first {
+			first = false
+		} else {
+			if _, err := w.WriteString("\n"); err != nil {
+				return err
+			}
+		}
+		if err := wrapParagraph(scanner.Text(), width, w); err != nil {
+			return err
+		}
 	}
-	fmt.Println(width)
+	if err := scanner.Err(); err != nil {
+		return err
+	}
+	if err := w.Flush(); err != nil {
+		return err
+	}
+	return nil
 }
