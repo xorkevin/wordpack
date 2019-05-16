@@ -1,6 +1,8 @@
 package linebreak
 
 import (
+	"bufio"
+	"bytes"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -20,4 +22,17 @@ func Test_findBreakpointsKnuth(t *testing.T) {
 	cost, breakstack := findBreakpointsKnuth([]int{3, 2, 2, 5}, 6)
 	assert.Equal(10, cost, "cost should be sum of squares discounting the last line")
 	assert.Equal([]int{1, 3}, breakstack, "breakstack should not be greedy")
+}
+
+func Test_wrapParagraph(t *testing.T) {
+	assert := assert.New(t)
+
+	b := bytes.Buffer{}
+	w := bufio.NewWriter(&b)
+	err := wrapParagraph("AAA BB CC DDDDD", 6, w)
+	assert.Nil(err, "wrapping a paragraph should not error on write")
+	err = w.Flush()
+	assert.Nil(err, "writing to a buffer should not error on write")
+	s := b.String()
+	assert.Equal("AAA\nBB CC\nDDDDD\n", s, "string should not be greedily wrapped")
 }

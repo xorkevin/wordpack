@@ -1,6 +1,7 @@
 package linebreak
 
 import (
+	"bufio"
 	"fmt"
 	"strings"
 )
@@ -77,12 +78,35 @@ func findBreakpointsKnuth(wordLengths []int, width int) (int, []int) {
 	return finalcost, breakstack
 }
 
+func wrapParagraph(paragraph string, width int, w *bufio.Writer) error {
+	words, wordLengths := splitWords(paragraph)
+	_, breakstack := findBreakpointsKnuth(wordLengths, width)
+	prev := 0
+	for _, i := range breakstack {
+		if _, err := w.WriteString(strings.Join(words[prev:i], " ")); err != nil {
+			return err
+		}
+		if _, err := w.WriteString("\n"); err != nil {
+			return err
+		}
+		prev = i
+	}
+	if _, err := w.WriteString(strings.Join(words[prev:], " ")); err != nil {
+		return err
+	}
+	if _, err := w.WriteString("\n"); err != nil {
+		return err
+	}
+	return nil
+}
+
 // WrapParagraphs wraps stdin or an input file on a per paragraph basis. A
 // paragraph is separated by two new lines.
-func WrapParagraphs(args []string) {
+func WrapParagraphs(width int, args []string) {
 	if len(args) > 0 {
 		fmt.Println(args[0])
 	} else {
 		fmt.Println("stdin")
 	}
+	fmt.Println(width)
 }

@@ -12,6 +12,10 @@ import (
 
 var cfgFile string
 
+var (
+	paragraphWidth int
+)
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "wordpack",
@@ -22,7 +26,7 @@ selectable line break algorithm`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
-		linebreak.WrapParagraphs(args)
+		linebreak.WrapParagraphs(paragraphWidth, args)
 	},
 }
 
@@ -46,6 +50,7 @@ func init() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.Flags().IntVarP(&paragraphWidth, "width", "w", 80, "width at which to wrap paragraphs")
 }
 
 // initConfig reads in config file and ENV variables if set.
