@@ -80,10 +80,10 @@ func findBreakpointsKnuth(wordLengths []int, width int) (int, []int) {
 	return finalcost, breakstack
 }
 
-func wrapParagraph(paragraph string, width int, w *bufio.Writer, showWrapCost bool) (int, error) {
+func wrapParagraph(paragraph string, width int, w *bufio.Writer) (int, error) {
 	words, wordLengths := splitWords(paragraph)
 	cost, breakstack := findBreakpointsKnuth(wordLengths, width)
-	if showWrapCost {
+	if w == nil {
 		return cost, nil
 	}
 	prev := 0
@@ -128,7 +128,10 @@ func splitParagraphs(data []byte, atEOF bool) (int, []byte, error) {
 func WrapParagraphs(width int, showWrapCost bool) error {
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Split(splitParagraphs)
-	w := bufio.NewWriter(os.Stdout)
+	var w *bufio.Writer
+	if !showWrapCost {
+		w = bufio.NewWriter(os.Stdout)
+	}
 
 	first := true
 
@@ -144,7 +147,7 @@ func WrapParagraphs(width int, showWrapCost bool) error {
 				}
 			}
 		}
-		cost, err := wrapParagraph(scanner.Text(), width, w, showWrapCost)
+		cost, err := wrapParagraph(scanner.Text(), width, w)
 		if err != nil {
 			return err
 		}

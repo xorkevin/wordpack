@@ -1,4 +1,11 @@
-.PHONY: test fmt vet prepare
+.PHONY: all install
+
+all: install
+
+install:
+	go install .
+
+.PHONY: test coverage bench fmt vet prepare
 
 COVERAGE=cover.out
 COVERAGE_ARGS=-covermode count -coverprofile $(COVERAGE)

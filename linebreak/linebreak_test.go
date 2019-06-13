@@ -27,14 +27,22 @@ func Test_findBreakpointsKnuth(t *testing.T) {
 func Test_wrapParagraph(t *testing.T) {
 	assert := assert.New(t)
 
-	b := bytes.Buffer{}
-	w := bufio.NewWriter(&b)
-	err := wrapParagraph("AAA BB CC DDDDD", 6, w)
-	assert.Nil(err, "wrapping a paragraph should not error on write")
-	err = w.Flush()
-	assert.Nil(err, "writing to a buffer should not error on write")
-	s := b.String()
-	assert.Equal("AAA\nBB CC\nDDDDD\n", s, "string should not be greedily wrapped")
+	{
+		cost, err := wrapParagraph("AAA BB CC DDDDD", 6, nil)
+		assert.NoError(err, "wrapping a paragraph should not error")
+		assert.Equal(10, cost, "calculated cost should be correct")
+	}
+	{
+		b := bytes.Buffer{}
+		w := bufio.NewWriter(&b)
+		cost, err := wrapParagraph("AAA BB CC DDDDD", 6, w)
+		assert.NoError(err, "wrapping a paragraph should not error")
+		assert.Equal(10, cost, "calculated cost should be correct")
+		err = w.Flush()
+		assert.Nil(err, "writing to a buffer should not error on write")
+		s := b.String()
+		assert.Equal("AAA\nBB CC\nDDDDD\n", s, "string should not be greedily wrapped")
+	}
 }
 
 func Test_splitParagraphs(t *testing.T) {
