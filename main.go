@@ -1,6 +1,6 @@
 package main
 
-import "github.com/xorkevin/wordpack/cmd"
+import "xorkevin.dev/wordpack/cmd"
 
 func main() {
 	cmd.Execute()
